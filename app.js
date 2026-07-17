@@ -7,6 +7,10 @@ import router from './routes/index.route.js';
 import { errorH , notFound} from './middlewares/error.middleware.js';
 import {addCurrentDate,checkGETDate } from  './middlewares/users.middleware.js'
 const app = express()
+// תוספת הרשאה לקליינט ספציפי
+app.use(cors({ origin: 'http://127.0.0.1:5500/client.html' }));
+
+
 app.use(express.json());
 
 
@@ -14,13 +18,15 @@ const rt= rateLimit({
   windowMs: 15 * 60 * 1000, 
   max: 100 
 })
-app.use(rt);
-app.use(addCurrentDate());
-app.use(checkGETDate())
+
+
 // משמש לחיזוק התשובה שחוזרת מהשרת 
 app.use(helmet());
 // אפשרויות גישה מכל פרוקיט 
-app.use(cors());
+// app.use(cors());
+app.use(rt);
+app.use(addCurrentDate());
+app.use(checkGETDate())
 app.use(morgan('dev'));
 app.use('/api',router );
 app.use(notFound);
