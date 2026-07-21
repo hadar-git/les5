@@ -3,10 +3,13 @@ import morgan from 'morgan'
 import rateLimit from 'express-rate-limit';
 import cors from 'cors';
 import express from 'express'
+import { connectDB } from './config/db.js';
 import router from './routes/index.route.js';
 import { errorH , notFound} from './middlewares/error.middleware.js';
 import {addCurrentDate,checkGETDate } from  './middlewares/users.middleware.js'
 const app = express()
+
+connectDB();
 // תוספת הרשאה לקליינט ספציפי
 app.use(cors({ origin: 'http://127.0.0.1:5500/client.html' }));
 
