@@ -7,9 +7,9 @@ const loans =new Schema({
 })
 const bookSchema =new Schema({
 code:Number, 
-name: String, 
+name: {type: String, min: 2, max: 20, unique: true},  
 price: Number, 
-category: String, 
+category: {type: String, enum:['abc', 'def', 'ghi', 'jkl']}, 
 author: {
     aName: String, 
     phone: Number, 

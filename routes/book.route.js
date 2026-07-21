@@ -1,6 +1,6 @@
 
 
-import {getAllBooks, getBookByID, addBook, updateBook, updateReturnedBook, updateLoaningBook, deleteBook } from '../controllers/book.controller.js'
+import {getAllBooks, getBookByID, addBook, updateBook, updateReturnedBook, updateLoaningBook, deleteBook, getBookByCategory } from '../controllers/book.controller.js'
 import { Router } from "express";
 
 const router = Router();
@@ -15,6 +15,7 @@ import { bookDt, bookUpdateDt } from '../schemas_/book.schema.js';
 
 router.get('/',getAllBooks);
 router.get('/:id', getBookByID);
+router.get('/:category/category', getBookByCategory);
 router.post('/',validateBody(bookDt),  addBook);
 router.put('/:id', validateBody(bookUpdateDt),updateBook );
 router.patch('/:id/borrow', updateLoaningBook); 

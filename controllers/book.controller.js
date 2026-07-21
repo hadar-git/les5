@@ -169,3 +169,18 @@ export const deleteBook =async (req, res, next) => {
         next(err);
 }
 };
+
+export const getBookByCategory = async(req, res, next) => {
+
+
+   
+     try {
+    const { category } = req.params;
+    const resu = await book.find({ category });
+    res.status(200).send(resu);
+  } catch (err) {
+    err.status = 500;
+    err.type = 'server error';
+    next(err);
+  }
+};

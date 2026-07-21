@@ -1,10 +1,11 @@
 import { notFound } from '../middlewares/error.middleware.js';
-import {users} from '../users.js'
+import {user} from '../models/user.model.js'
 
 
- export const getAllUsers = (req, res, next) => {
+ export const getAllUsers =async (req, res, next) => {
 try{
-    res.status(200).send(users);
+  const u = await user.find();
+     res.status(200).send(u);
 }
     
 catch(err)
@@ -15,10 +16,11 @@ catch(err)
 }
 }
 
-export const registerUser = (req, res, next) => {
+export const registerUser = async (req, res, next) => {
 try {
-     users.push(req.body)
- res.status(201).send(req.body);
+const u=  new user(req.body);
+await    u.save();
+ res.status(201).send(u);
 } catch (err) {
         err.status = 500;        
         err.type = 'server error'; 
@@ -27,9 +29,11 @@ try {
 
 }
 
-export const loginUser = (req, res, next) => {
+
+
+export const loginUser =async (req, res, next) => {
 try {
-    const u = users.find(user => user.email === req.body.email && user.password === req.body.password)
+    const u = await user.findOne({email: req.body.email ,password: req.body.password})
     if(u)
     {
         res.status(200).send(u);
