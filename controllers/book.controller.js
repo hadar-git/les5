@@ -1,13 +1,14 @@
-import {books} from '../index.js'
 
+import { book } from '../models/book.model.js'
 
- export const getAllBooks = (req, res, next) => {
+ export const getAllBooks = async (req, res, next) => {
 try {
      const { limit = '10', page= '1' , name = ''} = req.query;
-     const filtered = books.filter(book =>  book.name.includes(name));
-     const startIndex = limit * (page - 1);
-     const resu = filtered.slice(startIndex, startIndex + limit);
- 
+      const startIndex = limit * (page - 1);
+const resu = await book.find({ name: new RegExp(name, 'i') })
+  .skip(startIndex)
+  .limit(Number(limit));
+
       res.status(200).json(resu);
 
 } catch (err) {
@@ -18,13 +19,12 @@ try {
     
 }
 
-export const getBookByID = (req, res, next) => {
+export const getBookByID = async (req, res, next) => {
     try {
-        let b=books.find(book => Number(book.code) === Number(req.params.id));
-
+        let b= await book.findOne({ code: +req.params.id  });
 if(b)
 {
-     res.status(200).send(b );
+     res.status(200).send(b);
 }
        
 else{
@@ -41,10 +41,11 @@ else{
 
 }
 
- export const addBook = (req, res, next) => { 
+ export const addBook =async  (req, res, next) => { 
 try {
-      books.push(req.body)
- res.status(201).send(req.body);
+    const newB = new book(req.body);
+   await newB.save();
+    res.status(201).send(newB);
 } catch (err) {
      err.status = 500;        
         err.type = 'server error'; 
@@ -53,16 +54,16 @@ try {
   
 }
 
-export const updateBook = (req, res, next) => {
-
+export const updateBook =async  (req, res, next) => {
 
     try {
-   const b= books.find(book => Number(book.code) === Number(req.params.id)) 
+   const b=await book.findOne({code: +req.params.id}); 
     if(b)
     {
        b.name= req.body.name;
         b.category=req.body.category;
-        b.price= req.body.price;
+        b.price= +req.body.price;
+        await b.save();
      res.status(200).send(b);
     }
     else{
@@ -81,13 +82,11 @@ catch (err) {
  }
 
 
-export const updateLoaningBook = (req, res, next) => {
+export const updateLoaningBook =async  (req, res, next) => {
 
-
-    try {
+       try {
     
-    const b= books.find(book => Number(book.code) === Number(req.params.id)) 
-
+    const b= await book.findOne({code: +req.params.id});
     if(!b)
     {
   const err = new Error('could not find it');
@@ -95,13 +94,11 @@ export const updateLoaningBook = (req, res, next) => {
     err.type = 'not found';
     next(err);
     }
-    else if(  b.isBorrowed ==false  )
-    {
-        b.isBorrowed=true;
-
-        b.loans.push({ borrowDate: new Date(), customerCode: req.body.customerCode })
-        res.status(200).send(b);
-
+   else if (b.isBorrowed == false) {
+    b.isBorrowed = true;
+    b.loans.push({ borrowDate: new Date(), customerCode: req.body.customerCode });
+    await b.save();
+    res.status(200).send(b);
     }
     else{
       const err = new Error('already in use');
@@ -114,14 +111,15 @@ export const updateLoaningBook = (req, res, next) => {
         err.type = 'server error'; 
         next(err);
 }
-}
+
+};
 
 
-export const updateReturnedBook = (req, res, next) => {
+export const updateReturnedBook =async (req, res, next) => {
 
 
     try {
-     const b= books.find(book => Number(book.code) === Number(req.params.id)) 
+     const b=await book.findOne({code:+req.params.id }); 
      if(!b)
     {
   const err = new Error('could not find it');
@@ -129,11 +127,12 @@ export const updateReturnedBook = (req, res, next) => {
     err.type = 'not found';
     next(err);
     }
-    else if(b.isBorrowed ==true  )
+    else if(b.isBorrowed ==true)
         {
         console.log("returned");
         b.isBorrowed=false
-            res.status(200).send(b );
+       await b.save();
+            res.status(200).send(b);
         }
         else{
              const err = new Error('not borrowed');
@@ -150,18 +149,13 @@ export const updateReturnedBook = (req, res, next) => {
 }
 
 
-export const deleteBook = (req, res, next) => {
+export const deleteBook =async (req, res, next) => {
 
-
-    try {
-      const index = books.findIndex(book => Number(book.code) === Number(req.params.id));
-
-
-    if(index!==-1)
-   {
-    console.log("deleted");
-  
-        res.status(200).send( books.splice(index, 1));
+    try {      
+     const b = await book.findOneAndDelete({ code: +req.params.id});
+    if(b)
+    {
+        res.status(200).send();
     }
     else{
        const err = new Error('not found');
@@ -174,5 +168,4 @@ export const deleteBook = (req, res, next) => {
         err.type = 'server error'; 
         next(err);
 }
-   
-}
+};

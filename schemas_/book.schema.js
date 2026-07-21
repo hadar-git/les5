@@ -2,7 +2,7 @@
 import Joi from "joi"
 
 export const bookDt= Joi.object({
-    code: Joi.string().max(6).required(), 
+    code: Joi.number().required(), 
     name: Joi.string(), 
     category: Joi.string(), 
     price: Joi.number().min(0).max(100).required(), 
