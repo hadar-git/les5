@@ -29,7 +29,7 @@ app.use(helmet());
 // app.use(cors());
 app.use(rt);
 app.use(addCurrentDate());
-app.use(checkGETDate())
+//app.use(checkGETDate())
 app.use(morgan('dev'));
 app.use('/api',router );
 app.use(notFound);

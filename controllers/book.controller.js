@@ -1,6 +1,7 @@
 
 import { book } from '../models/book.model.js'
-
+import { loan } from '../models/loans.model.js';
+import { user } from '../models/user.model.js';
  export const getAllBooks = async (req, res, next) => {
 try {
      const { limit = '10', page= '1' , name = ''} = req.query;
@@ -95,10 +96,33 @@ export const updateLoaningBook =async  (req, res, next) => {
     next(err);
     }
    else if (b.isBorrowed == false) {
-    b.isBorrowed = true;
+        const u = await user.findOne({ code: req.body.customerCode });
+
+        if (u.loans.length >= 3) {
+            const err = new Error('you already have 3 books borrowed');
+            err.status = 403;
+            err.type = 'borrow limit reached';
+            return next(err);
+}
+        else{
+             b.isBorrowed = true;
+         
+b.borrowedBy = req.body.customerCode;
     b.loans.push({ borrowDate: new Date(), customerCode: req.body.customerCode });
+    const returningDate = new Date();
+returningDate.setDate(returningDate.getDate() + 14);
+    u.loans.push({ name: b.name, code: b.code, returningDate});
+    const newLoan = new loan({
+    bookCode: b.code,
+    bookName: b.name,
+    userCode: req.body.customerCode
+});
+await newLoan.save();
+    await u.save(); 
     await b.save();
     res.status(200).send(b);
+        }
+   
     }
     else{
       const err = new Error('already in use');
@@ -128,10 +152,25 @@ export const updateReturnedBook =async (req, res, next) => {
     next(err);
     }
     else if(b.isBorrowed ==true)
-        {
-        console.log("returned");
-        b.isBorrowed=false
-       await b.save();
+      {  const borrowerCode = b.borrowedBy;  
+
+b.isBorrowed = false;
+b.borrowedBy = null;
+
+const loanRecord = await loan.findOne({ 
+    bookCode: +req.params.id, 
+    userCode: borrowerCode,  // ← משתמשים בערך השמור
+    returnDate: undefined 
+});
+if (loanRecord) {
+    loanRecord.returnDate = new Date();
+    await loanRecord.save();
+}
+
+const u = await user.findOne({ code: borrowerCode });  // ← גם כאן
+u.loans = u.loans.filter(bb => bb.code !== +req.params.id);
+await u.save();
+await b.save();
             res.status(200).send(b);
         }
         else{

@@ -14,8 +14,9 @@ import { bookDt, bookUpdateDt } from '../schemas_/book.schema.js';
 
 
 router.get('/',getAllBooks);
+router.get('/:id/category', getBookByCategory);
 router.get('/:id', getBookByID);
-router.get('/:category/category', getBookByCategory);
+
 router.post('/',validateBody(bookDt),  addBook);
 router.put('/:id', validateBody(bookUpdateDt),updateBook );
 router.patch('/:id/borrow', updateLoaningBook); 

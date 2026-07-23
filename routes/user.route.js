@@ -1,4 +1,4 @@
-import { users } from '../users.js';
+
 
 import { getAllUsers, registerUser, loginUser } from '../controllers/user.controller.js'
 import { userDt } from '../schemas_/user.schema.js';

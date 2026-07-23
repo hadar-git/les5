@@ -2,8 +2,8 @@
 
 import { model, Schema} from 'mongoose';
 const loans =new Schema({
-    custCode: Number, 
-    date: String
+      customerCode: Number, 
+    borrowDate: Date
 })
 const bookSchema =new Schema({
 code:Number, 
@@ -17,6 +17,7 @@ author: {
 }, 
  isBorrowed:Boolean, 
  loans: [loans],
+  borrowedBy: Number
 });
 
 
