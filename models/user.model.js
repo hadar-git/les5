@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose'
-
+import bcrypt from 'bcrypt';
 
 const loans= new Schema({
  name: String, 
@@ -19,5 +19,24 @@ export const userSchema = new Schema({
     loans:[loans], 
     
 })
+
+userSchema.pre('save', async function (next) {
+    this.password = await bcrypt.hash(this.password, 10);
+    // next();
+});
+
+userSchema.statics.comparePassword = async function (candidatePassword, hashedPassword) {
+    return await bcrypt.compare(candidatePassword,hashedPassword);
+};
+
+userSchema.set('toJSON', {
+    transform: function (doc, ret) {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.password;
+       // delete ret.__v;
+        return ret;
+    }
+});
 
 export const user = model('user', userSchema);
